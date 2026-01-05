@@ -164,7 +164,6 @@ npx expo install expo-font react-native-safe-area-context react-native-screens
 | `react-native-safe-area-context` | `@react-navigation/bottom-tabs`, `@react-navigation/native-stack` |
 | `react-native-screens` | `@react-navigation/bottom-tabs`, `@react-navigation/native-stack` |
 
-> ⚠️ **Warning:** Your app may crash outside of Expo Go without these dependencies!
 
 </details>
 
