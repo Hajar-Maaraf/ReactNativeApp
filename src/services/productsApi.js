@@ -17,7 +17,7 @@ const mockProducts = [
     "price": 199.00,
     "description": "Un ensemble vibrant de tulipes multicolores pour égayer votre journée.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/207962/pexels-photo-207962.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT83WwC9Qx2DIOIlHEzQUvYJhSWv2ni39F5vQ&s"
   },
   {
     "id": "3",
@@ -25,7 +25,7 @@ const mockProducts = [
     "price": 179.00,
     "description": "Des tournesols lumineux qui apportent le soleil dans votre maison.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/1266810/pexels-photo-1266810.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8vJBkDNclT4aJb9dz2Kj2ZuH5EY6KqWvu1w&s"
   },
   {
     "id": "4",
@@ -33,7 +33,7 @@ const mockProducts = [
     "price": 350.00,
     "description": "Une élégante orchidée blanche dans un pot décoratif.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/1021703/pexels-photo-1021703.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRqqI4TW-WbXsXmeBgUnbtfb293fZTxigq9kgykAC564qt_arj4GNM2LvRc1yyo1kOmycRqd_4TVi59bxMSR0PHRbssLb_dj_8FKbGG1hc&s=10"
   },
   {
     "id": "5",
@@ -41,7 +41,7 @@ const mockProducts = [
     "price": 249.00,
     "description": "Un assortiment de fleurs de saison aux couleurs vives.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/1857157/pexels-photo-1857157.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://cdn.topgeschenken.nl/cdn-cgi/image/quality=100,format=webp,fit=cover,width=500,height=500/images/product/48152/675abb859833b.png"
   },
   {
     "id": "16",
@@ -65,7 +65,7 @@ const mockProducts = [
     "price": 310.00,
     "description": "Bouquet raffiné de 15 roses blanches longues tiges.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/1470589/pexels-photo-1470589.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://flowersmaroc.com/75-home_default/fleurs-100-roses-blanches.jpg"
   },
   {
     "id": "19",
@@ -73,7 +73,7 @@ const mockProducts = [
     "price": 390.00,
     "description": "Arrangement unique de fleurs tropicales colorées.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/992734/pexels-photo-992734.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://www.agitateur-floral.com/2834-medium_default/composition-fleurs-exotique-tropique.jpg"
   },
   {
     "id": "20",
@@ -89,7 +89,7 @@ const mockProducts = [
     "price": 260.00,
     "description": "Magnifiques hortensias bleus dans un vase élégant.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/1131407/pexels-photo-1131407.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS3XThwQosQZnu6-QDQzP0lL1gUAORam4qTeA&s"
   },
   {
     "id": "22",
@@ -97,7 +97,7 @@ const mockProducts = [
     "price": 169.00,
     "description": "Bouquet joyeux de gerberas aux couleurs vives.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/1109561/pexels-photo-1109561.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTjSuG4B2564_eU7Er2bTFFS8WoUrqI5XD-nA&s"
   },
   {
     "id": "23",
@@ -105,7 +105,7 @@ const mockProducts = [
     "price": 210.00,
     "description": "Délicats freesias au parfum enivrant.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/1083895/pexels-photo-1083895.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSInm__zBlHxnvMPoRI1i6VnJZSjr-Lqr8O9A&s"
   },
   {
     "id": "24",
@@ -113,7 +113,7 @@ const mockProducts = [
     "price": 240.00,
     "description": "Composition élégante de dahlias en nuances pastels.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/1029896/pexels-photo-1029896.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqkcVMOaaBRBGSHC7ru6CHfIn9novhUFjAXA&s"
   },
   {
     "id": "25",
@@ -121,7 +121,7 @@ const mockProducts = [
     "price": 195.00,
     "description": "Bouquet raffiné d'anémones blanches et roses.",
     "category": "fleurs",
-    "image": "https://images.pexels.com/photos/569354/pexels-photo-569354.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2hzCAyuxB4Sg1cqv8BOPbqcj0Yw-eZcOI4Q&s"
   },
   {
     "id": "6",
@@ -225,7 +225,7 @@ const mockProducts = [
     "price": 145.00,
     "description": "Nougat tendre recouvert de chocolat noir.",
     "category": "chocolats",
-    "image": "https://images.pexels.com/photos/4110101/pexels-photo-4110101.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://www.nougatsoubeyran.com/wp-content/uploads/2023/08/Tetes-de-chapitres-5.jpg"
   },
   {
     "id": "10",
@@ -249,7 +249,7 @@ const mockProducts = [
     "price": 320.00,
     "description": "Gâteau au chocolat fondant avec cœur coulant.",
     "category": "gateaux",
-    "image": "https://images.pexels.com/photos/4553363/pexels-photo-4553363.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSVckuSlqcK3pp6gtYlGCRJXS1s2EVNzwisDWZXxyTAQqTn3kQiHKyTwipqoMdnXY8bRpJTP0iZb9V-3bUubpTg4YaNMHmN9dS_XuwzBdI&s=10"
   },
   {
     "id": "13",
@@ -265,7 +265,7 @@ const mockProducts = [
     "price": 890.00,
     "description": "Gâteau de mariage élégant sur 3 étages personnalisable.",
     "category": "gateaux",
-    "image": "https://images.pexels.com/photos/140831/pexels-photo-140831.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQe9yiMBCOA65SVwcF-0oF8b9cJzVZElzqCXA&s"
   },
   {
     "id": "15",
@@ -273,7 +273,7 @@ const mockProducts = [
     "price": 220.00,
     "description": "Authentique cheesecake crémeux avec coulis de fruits rouges.",
     "category": "gateaux",
-    "image": "https://images.pexels.com/photos/1126359/pexels-photo-1126359.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgmvk6fUX_tweiguqtXz3Oqb53Jlr02_kLXQ&s"
   },
   {
     "id": "35",
@@ -305,7 +305,7 @@ const mockProducts = [
     "price": 89.00,
     "description": "Éclair garni de crème au café onctueuse.",
     "category": "gateaux",
-    "image": "https://images.pexels.com/photos/372851/pexels-photo-372851.jpeg?auto=compress&cs=tinysrgb&w=400"
+    "image":"https://files.meilleurduchef.com/mdc/photo/recette/eclair-cafe/eclair-cafe-640.jpg"
   },
   {
     "id": "39",
@@ -313,7 +313,7 @@ const mockProducts = [
     "price": 189.00,
     "description": "Tiramisu traditionnel italien fait maison.",
     "category": "gateaux",
-    "image": "https://www.marmiton.org/recettes/recette_tiramisu-rapide_14796.aspx#d110446-p1"
+    "image": "https://assets.afcdn.com/recipe/20200503/110446_w600.jpg"
   },
   {
     "id": "40",
