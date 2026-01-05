@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, Image, Pressable, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import React, { memo, useState } from 'react';
+import { View, Text, Image, Pressable, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
@@ -17,7 +17,8 @@ const CATEGORY_LABELS = {
   gateaux: '🎂 Gâteaux',
 };
 
-export default function ProductCard({ product, onPress, onAddToCart, onFavorite, isFavorite, compact, index }) {
+function ProductCard({ product, onPress, onAddToCart, onFavorite, isFavorite, compact, index }) {
+  const [imageLoading, setImageLoading] = useState(true);
   const categoryColor = CATEGORY_COLORS[product.category] || '#E91E63';
   const categoryLabel = CATEGORY_LABELS[product.category] || product.category;
   const isFav = isFavorite === true;
@@ -28,6 +29,10 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
         <Pressable 
           style={styles.compactCard} 
           onPress={() => onPress && onPress(product)}
+          accessible={true}
+          accessibilityLabel={`${product.title}, ${product.price} dirhams`}
+          accessibilityHint="Appuyez pour voir les détails du produit"
+          accessibilityRole="button"
         >
           <View>
             <View style={styles.compactImageContainer}>
@@ -35,7 +40,14 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
                 source={{ uri: product.image || 'https://via.placeholder.com/150' }}
                 style={styles.compactImage}
                 resizeMode="cover"
+                onLoadStart={() => setImageLoading(true)}
+                onLoadEnd={() => setImageLoading(false)}
               />
+              {imageLoading && (
+                <View style={styles.imageLoadingContainer}>
+                  <ActivityIndicator size="small" color={categoryColor} />
+                </View>
+              )}
               <View style={[styles.compactGradient, { backgroundColor: `${categoryColor}30` }]} />
               {onFavorite && (
                 <TouchableOpacity
@@ -44,6 +56,9 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
                     e.stopPropagation();
                     onFavorite(product);
                   }}
+                  accessible={true}
+                  accessibilityLabel={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+                  accessibilityRole="button"
                 >
                   <Ionicons
                     name={isFav ? 'heart' : 'heart-outline'}
@@ -73,6 +88,10 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
                       e.stopPropagation();
                       onAddToCart(product);
                     }}
+                    accessible={true}
+                    accessibilityLabel="Ajouter au panier"
+                    accessibilityHint={`Ajouter ${product.title} au panier`}
+                    accessibilityRole="button"
                   >
                     <Ionicons name="add" size={18} color="#fff" />
                   </TouchableOpacity>
@@ -99,7 +118,14 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
               source={{ uri: product.image || 'https://via.placeholder.com/150' }}
               style={styles.image}
               resizeMode="cover"
+              onLoadStart={() => setImageLoading(true)}
+              onLoadEnd={() => setImageLoading(false)}
             />
+            {imageLoading && (
+              <View style={styles.imageLoadingContainer}>
+                <ActivityIndicator size="large" color={categoryColor} />
+              </View>
+            )}
             {/* Gradient overlay */}
             <View style={styles.imageOverlay} />
             
@@ -428,4 +454,24 @@ const styles = StyleSheet.create({
   compactBadgeText: {
     fontSize: 14,
   },
+  imageLoadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+  },
+});
+
+export default memo(ProductCard, (prevProps, nextProps) => {
+  return (
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.isFavorite === nextProps.isFavorite &&
+    prevProps.isAddingToCart === nextProps.isAddingToCart &&
+    prevProps.compact === nextProps.compact
+  );
 });

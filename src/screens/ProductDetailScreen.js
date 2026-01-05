@@ -46,7 +46,13 @@ export default function ProductDetailScreen({ route, navigation }) {
     if (id) {
       setLoading(true);
       getProductById(id)
-        .then(setProduct)
+        .then((fetchedProduct) => {
+          setProduct(fetchedProduct);
+        })
+        .catch((error) => {
+          console.error('Error fetching product:', error);
+          setProduct(null);
+        })
         .finally(() => {
           setLoading(false);
           Animated.timing(fadeAnim, {
@@ -55,6 +61,10 @@ export default function ProductDetailScreen({ route, navigation }) {
             useNativeDriver: true,
           }).start();
         });
+    } else {
+      // If no ID is provided, stop loading and show error
+      setLoading(false);
+      setProduct(null);
     }
   }, [id]);
 

@@ -67,10 +67,14 @@ export default function CatalogScreen({ navigation }) {
     setFavoriteIds(favs.map((f) => f.id));
   };
 
-  const handleToggleFavorite = async (product) => {
+  const handleToggleFavorite = useCallback(async (product) => {
     await toggleFavorite(product);
     await loadFavorites();
-  };
+  }, []);
+
+  const handleAddToCart = useCallback((product) => {
+    addToCart(product);
+  }, [addToCart]);
 
   const filterByCategory = () => {
     if (selectedCategory === 'all') {
@@ -82,9 +86,9 @@ export default function CatalogScreen({ navigation }) {
     }
   };
 
-  const handleProductPress = (product) => {
+  const handleProductPress = useCallback((product) => {
     navigation.navigate('ProductDetail', { id: product.id });
-  };
+  }, [navigation]);
 
   const renderCategoryButton = (category) => (
     <TouchableOpacity
@@ -227,7 +231,7 @@ export default function CatalogScreen({ navigation }) {
               subtitle="Découvrez nos derniers produits"
               products={featuredProducts}
               onProductPress={handleProductPress}
-              onAddToCart={addToCart}
+              onAddToCart={handleAddToCart}
               onSeeAll={() => setSelectedCategory('all')}
             />
           )}
@@ -239,7 +243,7 @@ export default function CatalogScreen({ navigation }) {
               subtitle="Ce que nos clients adorent"
               products={popularProducts}
               onProductPress={handleProductPress}
-              onAddToCart={addToCart}
+              onAddToCart={handleAddToCart}
               onSeeAll={() => setSelectedCategory('all')}
             />
           )}
@@ -280,9 +284,9 @@ export default function CatalogScreen({ navigation }) {
               <ProductCard
                 key={item.id}
                 product={item}
-                onPress={() => handleProductPress(item)}
-                onAddToCart={() => addToCart(item)}
-                onFavorite={() => handleToggleFavorite(item)}
+                onPress={handleProductPress}
+                onAddToCart={handleAddToCart}
+                onFavorite={handleToggleFavorite}
                 isFavorite={favoriteIds.includes(item.id)}
                 index={index}
                 compact={true}

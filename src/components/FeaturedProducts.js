@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -19,7 +19,7 @@ const CATEGORY_COLORS = {
   gateaux: '#FF7043',
 };
 
-export default function FeaturedProducts({ 
+function FeaturedProducts({ 
   title, 
   subtitle,
   products, 
@@ -28,7 +28,7 @@ export default function FeaturedProducts({
   onSeeAll,
   horizontal = true,
 }) {
-  const renderProduct = ({ item }) => {
+  const renderProduct = useCallback(({ item }) => {
     const categoryColor = CATEGORY_COLORS[item.category] || '#E91E63';
     
     return (
@@ -82,7 +82,9 @@ export default function FeaturedProducts({
         </View>
       </TouchableOpacity>
     );
-  };
+  }, [onProductPress, onAddToCart]);
+
+  const keyExtractor = useCallback((item) => item.id, []);
 
   return (
     <View style={styles.container}>
@@ -257,3 +259,5 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
 });
+
+export default memo(FeaturedProducts);

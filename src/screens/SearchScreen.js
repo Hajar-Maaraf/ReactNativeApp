@@ -72,7 +72,7 @@ export default function SearchScreen({ navigation }) {
   };
 
   const handleProductPress = (product) => {
-    navigation.navigate('ProductDetail', { product });
+    navigation.navigate('ProductDetail', { id: product.id });
   };
 
   const renderCategoryItem = ({ item }) => (
