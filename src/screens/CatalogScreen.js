@@ -7,26 +7,25 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { getProducts } from '../services/productsApi';
 import ProductCard from '../components/ProductCard';
+import PromoBanner from '../components/PromoBanner';
+import QuickActions from '../components/QuickActions';
+import FeaturedProducts from '../components/FeaturedProducts';
 import { CartContext } from '../contexts/CartContext';
 import { getFavorites, toggleFavorite } from '../utils/favorites';
-
-const CATEGORIES = [
-  { id: 'all', label: 'Tous', icon: 'grid-outline', color: '#E91E63' },
-  { id: 'fleurs', label: 'Fleurs', icon: 'flower-outline', color: '#E91E63' },
-  { id: 'chocolats', label: 'Chocolats', icon: 'cafe-outline', color: '#795548' },
-  { id: 'gateaux', label: 'Gâteaux', icon: 'fast-food-outline', color: '#FF9800' },
-];
+import { COLORS, SHADOWS, SPACING, RADIUS, FONT_SIZES, CATEGORIES } from '../utils/theme';
 
 export default function CatalogScreen({ navigation }) {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [favoriteIds, setFavoriteIds] = useState([]);
   const { addToCart } = useContext(CartContext);
 
@@ -56,15 +55,26 @@ export default function CatalogScreen({ navigation }) {
     }
   };
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadProducts();
+    await loadFavorites();
+    setRefreshing(false);
+  };
+
   const loadFavorites = async () => {
     const favs = await getFavorites();
     setFavoriteIds(favs.map((f) => f.id));
   };
 
-  const handleToggleFavorite = async (product) => {
+  const handleToggleFavorite = useCallback(async (product) => {
     await toggleFavorite(product);
     await loadFavorites();
-  };
+  }, []);
+
+  const handleAddToCart = useCallback((product) => {
+    addToCart(product);
+  }, [addToCart]);
 
   const filterByCategory = () => {
     if (selectedCategory === 'all') {
@@ -76,9 +86,9 @@ export default function CatalogScreen({ navigation }) {
     }
   };
 
-  const handleProductPress = (product) => {
+  const handleProductPress = useCallback((product) => {
     navigation.navigate('ProductDetail', { id: product.id });
-  };
+  }, [navigation]);
 
   const renderCategoryButton = (category) => (
     <TouchableOpacity
@@ -116,95 +126,185 @@ export default function CatalogScreen({ navigation }) {
     />
   );
 
+  // Obtenir les produits en vedette (5 premiers)
+  const featuredProducts = products.slice(0, 5).map((p, i) => ({
+    ...p,
+    isNew: i < 2,
+    discount: i === 2 ? 15 : null,
+    rating: (4.5 + Math.random() * 0.5).toFixed(1),
+    reviews: Math.floor(80 + Math.random() * 100),
+  }));
+
+  // Obtenir les produits populaires (5 aléatoires)
+  const popularProducts = [...products]
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 5)
+    .map(p => ({
+      ...p,
+      rating: (4.3 + Math.random() * 0.6).toFixed(1),
+      reviews: Math.floor(50 + Math.random() * 150),
+    }));
+
+  const handleQuickAction = (actionId) => {
+    switch(actionId) {
+      case 'new':
+        setSelectedCategory('all');
+        break;
+      case 'popular':
+        setSelectedCategory('all');
+        break;
+      case 'promo':
+        setSelectedCategory('all');
+        break;
+      case 'gift':
+        setSelectedCategory('fleurs');
+        break;
+      case 'express':
+        setSelectedCategory('all');
+        break;
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Enhanced Header with Gradient Effect */}
       <View style={styles.header}>
-        <View style={styles.headerGradientOverlay} />
-        <View style={styles.headerTop}>
-          <View style={styles.headerLeft}>
-            <Text style={styles.greeting}>Bienvenue sur</Text>
-            <View style={styles.titleContainer}>
-              <Text style={styles.title}>🌸 SweetBloom</Text>
-              <View style={styles.titleUnderline} />
+        <View style={styles.headerGradient} />
+        <View style={styles.headerContent}>
+          <View style={styles.headerTop}>
+            <View style={styles.headerLeft}>
+              <Text style={styles.greeting}>Bienvenue sur</Text>
+              <View style={styles.titleContainer}>
+                <Text style={styles.title}>🌸 SweetBloom</Text>
+                <View style={styles.titleGlow} />
+              </View>
+              <Text style={styles.tagline}>Votre bonheur livré</Text>
+            </View>
+            <View style={styles.headerActions}>
+              <TouchableOpacity 
+                style={styles.searchButton}
+                onPress={() => navigation.navigate('Search')}
+              >
+                <Ionicons name="search-outline" size={22} color="#E91E63" />
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.notificationButton}
+                onPress={() => navigation.navigate('Notifications')}
+              >
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationBadgeText}>3</Text>
+                </View>
+                <Ionicons name="notifications-outline" size={22} color="#E91E63" />
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.headerIcons}>
-            <TouchableOpacity 
-              style={styles.headerIcon}
-              onPress={() => navigation.navigate('Notifications')}
-            >
-              <View style={styles.notificationDot} />
-              <Ionicons name="notifications-outline" size={26} color="#2D3436" />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <View style={styles.subtitleContainer}>
-          <View style={styles.subtitleBadge}>
-            <Ionicons name="flower" size={16} color="#E91E63" />
-            <Text style={styles.subtitle}>Fleurs fraîches</Text>
-          </View>
-          <View style={styles.subtitleBadge}>
-            <Ionicons name="cafe" size={16} color="#795548" />
-            <Text style={styles.subtitle}>Chocolats</Text>
-          </View>
-          <View style={styles.subtitleBadge}>
-            <Ionicons name="pizza" size={16} color="#FF9800" />
-            <Text style={styles.subtitle}>Gâteaux</Text>
-          </View>
         </View>
       </View>
 
-      {/* Enhanced Categories with Better Design */}
-      <View style={styles.categoriesSection}>
-        <Text style={styles.categoriesTitle}>Catégories</Text>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.categoriesContainer}
-        >
-          {CATEGORIES.map(renderCategoryButton)}
-        </ScrollView>
-      </View>
-
-      {/* Enhanced Section Header */}
-      <View style={styles.sectionHeader}>
-        <View style={styles.sectionTitleContainer}>
-          <Text style={styles.sectionTitle}>
-            {selectedCategory === 'all' ? '✨ Nos Produits' : 
-             selectedCategory === 'fleurs' ? '🌸 Nos Fleurs' :
-             selectedCategory === 'chocolats' ? '🍫 Nos Chocolats' : '🎂 Nos Gâteaux'}
-          </Text>
-          <Text style={styles.sectionSubtitle}>
-            {selectedCategory === 'all' ? 'Découvrez toute notre collection' :
-             `Collection ${selectedCategory}`}
-          </Text>
-        </View>
-        <View style={styles.productCountBadge}>
-          <Text style={styles.productCount}>{filteredProducts.length}</Text>
-        </View>
-      </View>
-
-      {/* Products List */}
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#E91E63" />
           <Text style={styles.loadingText}>Chargement des produits...</Text>
         </View>
       ) : (
-        <FlatList
-          data={filteredProducts}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={styles.productsList}
+        <ScrollView
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Ionicons name="basket-outline" size={64} color="#ddd" />
-              <Text style={styles.emptyText}>Aucun produit trouvé</Text>
-            </View>
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={['#E91E63']}
+              tintColor="#E91E63"
+            />
           }
-        />
+        >
+          {/* Promotional Banners */}
+          <PromoBanner onPress={(promo) => console.log('Promo pressed:', promo)} />
+
+          {/* Quick Actions */}
+          <QuickActions onPress={handleQuickAction} />
+
+          {/* Featured Products */}
+          {featuredProducts.length > 0 && (
+            <FeaturedProducts
+              title="✨ Nouveautés"
+              subtitle="Découvrez nos derniers produits"
+              products={featuredProducts}
+              onProductPress={handleProductPress}
+              onAddToCart={handleAddToCart}
+              onSeeAll={() => setSelectedCategory('all')}
+            />
+          )}
+
+          {/* Popular Products */}
+          {popularProducts.length > 0 && (
+            <FeaturedProducts
+              title="🔥 Les Plus Populaires"
+              subtitle="Ce que nos clients adorent"
+              products={popularProducts}
+              onProductPress={handleProductPress}
+              onAddToCart={handleAddToCart}
+              onSeeAll={() => setSelectedCategory('all')}
+            />
+          )}
+
+          {/* Categories Section */}
+          <View style={styles.categoriesSection}>
+            <Text style={styles.categoriesTitle}>🏷️ Catégories</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoriesContainer}
+            >
+              {CATEGORIES.map(renderCategoryButton)}
+            </ScrollView>
+          </View>
+
+          {/* Enhanced Section Header */}
+          <View style={styles.sectionHeader}>
+            <View style={styles.sectionTitleContainer}>
+              <Text style={styles.sectionTitle}>
+                {selectedCategory === 'all' ? '📦 Tous les Produits' : 
+                 selectedCategory === 'fleurs' ? '🌸 Nos Fleurs' :
+                 selectedCategory === 'chocolats' ? '🍫 Nos Chocolats' : '🎂 Nos Gâteaux'}
+              </Text>
+              <Text style={styles.sectionSubtitle}>
+                {selectedCategory === 'all' ? 'Explorez toute notre collection' :
+                 `Collection ${selectedCategory}`}
+              </Text>
+            </View>
+            <View style={styles.productCountBadge}>
+              <Text style={styles.productCount}>{filteredProducts.length}</Text>
+            </View>
+          </View>
+
+          {/* Products Grid */}
+          <View style={styles.productsGrid}>
+            {filteredProducts.map((item, index) => (
+              <ProductCard
+                key={item.id}
+                product={item}
+                onPress={handleProductPress}
+                onAddToCart={handleAddToCart}
+                onFavorite={handleToggleFavorite}
+                isFavorite={favoriteIds.includes(item.id)}
+                index={index}
+                compact={true}
+              />
+            ))}
+          </View>
+
+          {filteredProducts.length === 0 && (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyEmoji}>🔍</Text>
+              <Text style={styles.emptyTitle}>Aucun produit trouvé</Text>
+              <Text style={styles.emptySubtitle}>Essayez une autre catégorie</Text>
+            </View>
+          )}
+
+          {/* Bottom Spacing */}
+          <View style={{ height: 100 }} />
+        </ScrollView>
       )}
     </View>
   );
@@ -218,25 +318,30 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingTop: 55,
-    paddingBottom: 20,
+    paddingBottom: 22,
     backgroundColor: '#fff',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    shadowColor: '#E91E63',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 8,
+    borderBottomLeftRadius: 32,
+    borderBottomRightRadius: 32,
+    shadowColor: '#1A1F36',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 24,
+    elevation: 10,
     position: 'relative',
     overflow: 'hidden',
   },
-  headerGradientOverlay: {
+  headerGradient: {
     position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(233, 30, 99, 0.02)',
+    top: -40,
+    right: -40,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(233, 30, 99, 0.05)',
+  },
+  headerContent: {
+    position: 'relative',
+    zIndex: 1,
   },
   headerTop: {
     flexDirection: 'row',
@@ -250,54 +355,87 @@ const styles = StyleSheet.create({
   titleContainer: {
     position: 'relative',
   },
-  titleUnderline: {
+  titleGlow: {
     position: 'absolute',
-    bottom: -4,
+    bottom: -6,
     left: 0,
-    width: 80,
-    height: 3,
+    right: 0,
+    height: 4,
     backgroundColor: '#E91E63',
     borderRadius: 2,
+    opacity: 0.2,
+    shadowColor: '#E91E63',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
   },
-  headerIcons: {
+  tagline: {
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  headerActions: {
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
   },
-  headerIcon: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: '#FDF2F4',
+  searchButton: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.primarySoft,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#E91E63',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 3,
+    ...SHADOWS.medium,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
   },
-  notificationDot: {
+  notificationButton: {
+    width: 48,
+    height: 48,
+    borderRadius: RADIUS.full,
+    backgroundColor: COLORS.primarySoft,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...SHADOWS.medium,
+    position: 'relative',
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  notificationBadge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#E91E63',
-    zIndex: 1,
+    top: 6,
+    right: 6,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
     borderWidth: 2,
-    borderColor: '#fff',
+    borderColor: COLORS.surface,
+    zIndex: 1,
+    ...SHADOWS.primary,
+  },
+  notificationBadgeText: {
+    color: COLORS.textInverse,
+    fontSize: FONT_SIZES.xs,
+    fontWeight: '800',
+    paddingHorizontal: 2,
   },
   greeting: {
-    fontSize: 15,
-    color: '#999',
-    marginBottom: 4,
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textTertiary,
+    marginBottom: SPACING.xs,
     fontWeight: '500',
+    letterSpacing: 0.3,
   },
   title: {
-    fontSize: 34,
+    fontSize: FONT_SIZES.display,
     fontWeight: '900',
-    color: '#E91E63',
-    letterSpacing: -1,
+    color: COLORS.primary,
+    letterSpacing: -1.2,
   },
   subtitleContainer: {
     flexDirection: 'row',
@@ -321,78 +459,71 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   categoriesSection: {
-    paddingTop: 20,
-    paddingBottom: 8,
+    paddingTop: SPACING.xl,
+    paddingBottom: SPACING.sm,
   },
   categoriesTitle: {
-    fontSize: 16,
+    fontSize: FONT_SIZES.lg,
     fontWeight: '700',
-    color: '#2D3436',
-    paddingHorizontal: 20,
-    marginBottom: 12,
+    color: COLORS.textPrimary,
+    paddingHorizontal: SPACING.xl,
+    marginBottom: SPACING.md,
   },
   categoriesContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: SPACING.lg,
   },
   categoryButton: {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderRadius: 20,
-    marginRight: 12,
-    minWidth: 90,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    elevation: 4,
-    borderWidth: 2,
-    borderColor: 'rgba(0, 0, 0, 0)',
+    backgroundColor: COLORS.surface,
+    paddingHorizontal: SPACING.xxl,
+    paddingVertical: SPACING.lg + 2,
+    borderRadius: RADIUS.xxl,
+    marginRight: SPACING.md + 2,
+    minWidth: 95,
+    ...SHADOWS.medium,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
   },
   categoryLabel: {
-    marginTop: 8,
-    fontSize: 13,
+    marginTop: SPACING.sm,
+    fontSize: FONT_SIZES.sm + 1,
     fontWeight: '700',
+    letterSpacing: 0.3,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginTop: 8,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.lg,
+    marginTop: SPACING.sm,
   },
   sectionTitleContainer: {
     flex: 1,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: FONT_SIZES.xxl,
     fontWeight: '800',
-    color: '#2D3436',
-    marginBottom: 4,
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.xs,
   },
   sectionSubtitle: {
-    fontSize: 13,
-    color: '#999',
+    fontSize: FONT_SIZES.sm + 1,
+    color: COLORS.textTertiary,
     fontWeight: '500',
   },
   productCountBadge: {
-    backgroundColor: '#E91E63',
-    paddingHorizontal: 14,
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: SPACING.md + 2,
     paddingVertical: 6,
-    borderRadius: 14,
-    shadowColor: '#E91E63',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: RADIUS.md + 2,
+    ...SHADOWS.primary,
   },
   productCount: {
-    fontSize: 14,
-    color: '#fff',
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textInverse,
     fontWeight: '800',
   },
   loadingContainer: {
@@ -401,23 +532,58 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 12,
-    color: '#888',
-    fontSize: 14,
+    marginTop: SPACING.md,
+    color: COLORS.textTertiary,
+    fontSize: FONT_SIZES.md,
   },
   productsList: {
-    paddingHorizontal: 20,
+    paddingHorizontal: SPACING.xl,
     paddingBottom: 100,
   },
+  productsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    paddingHorizontal: SPACING.md,
+    justifyContent: 'space-between',
+  },
   emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 60,
+    paddingVertical: 60,
+    paddingHorizontal: 40,
   },
-  emptyText: {
-    marginTop: 16,
-    color: '#888',
-    fontSize: 16,
+  emptyEmoji: {
+    fontSize: 60,
+    marginBottom: SPACING.lg,
+  },
+  emptyTitle: {
+    fontSize: FONT_SIZES.xl,
+    fontWeight: '700',
+    color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
+  },
+  emptySubtitle: {
+    fontSize: FONT_SIZES.md,
+    color: COLORS.textTertiary,
+    textAlign: 'center',
+  },
+  titleContainer: {
+    position: 'relative',
+  },
+  titleGlow: {
+    position: 'absolute',
+    bottom: -4,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: COLORS.primary,
+    borderRadius: RADIUS.full,
+    opacity: 0.3,
+  },
+  tagline: {
+    fontSize: FONT_SIZES.sm + 1,
+    color: COLORS.textSecondary,
+    marginTop: SPACING.xs,
+    fontWeight: '500',
   },
 });

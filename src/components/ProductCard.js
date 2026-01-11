@@ -1,5 +1,5 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Text, Image, Pressable, TouchableOpacity, StyleSheet, Dimensions, Animated } from 'react-native';
+import React, { memo, useState } from 'react';
+import { View, Text, Image, Pressable, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
@@ -17,68 +17,37 @@ const CATEGORY_LABELS = {
   gateaux: '🎂 Gâteaux',
 };
 
-const CATEGORY_GRADIENTS = {
-  fleurs: ['#E91E63', '#F48FB1'],
-  chocolats: ['#6D4C41', '#A1887F'],
-  gateaux: ['#FF7043', '#FFAB91'],
-};
-
-export default function ProductCard({ product, onPress, onAddToCart, onFavorite, isFavorite, compact = false, index = 0 }) {
+function ProductCard({ product, onPress, onAddToCart, onFavorite, isFavorite, compact, index }) {
+  const [imageLoading, setImageLoading] = useState(true);
   const categoryColor = CATEGORY_COLORS[product.category] || '#E91E63';
   const categoryLabel = CATEGORY_LABELS[product.category] || product.category;
-  
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const slideAnim = useRef(new Animated.Value(30)).current;
-
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 400,
-        delay: index * 100,
-        useNativeDriver: false,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 400,
-        delay: index * 100,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }, []);
-
-  const handlePressIn = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 0.97,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(scaleAnim, {
-      toValue: 1,
-      friction: 3,
-      useNativeDriver: false,
-    }).start();
-  };
+  const isFav = isFavorite === true;
 
   if (compact) {
     return (
-      <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+      <View style={styles.compactCardWrapper}>
         <Pressable 
           style={styles.compactCard} 
           onPress={() => onPress && onPress(product)}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
+          accessible={true}
+          accessibilityLabel={`${product.title}, ${product.price} dirhams`}
+          accessibilityHint="Appuyez pour voir les détails du produit"
+          accessibilityRole="button"
         >
-          <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+          <View>
             <View style={styles.compactImageContainer}>
               <Image
                 source={{ uri: product.image || 'https://via.placeholder.com/150' }}
                 style={styles.compactImage}
                 resizeMode="cover"
+                onLoadStart={() => setImageLoading(true)}
+                onLoadEnd={() => setImageLoading(false)}
               />
+              {imageLoading && (
+                <View style={styles.imageLoadingContainer}>
+                  <ActivityIndicator size="small" color={categoryColor} />
+                </View>
+              )}
               <View style={[styles.compactGradient, { backgroundColor: `${categoryColor}30` }]} />
               {onFavorite && (
                 <TouchableOpacity
@@ -87,11 +56,14 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
                     e.stopPropagation();
                     onFavorite(product);
                   }}
+                  accessible={true}
+                  accessibilityLabel={isFav ? "Retirer des favoris" : "Ajouter aux favoris"}
+                  accessibilityRole="button"
                 >
                   <Ionicons
-                    name={isFavorite ? 'heart' : 'heart-outline'}
+                    name={isFav ? 'heart' : 'heart-outline'}
                     size={18}
-                    color={isFavorite ? '#E91E63' : '#fff'}
+                    color={isFav ? '#E91E63' : '#fff'}
                   />
                 </TouchableOpacity>
               )}
@@ -116,35 +88,44 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
                       e.stopPropagation();
                       onAddToCart(product);
                     }}
+                    accessible={true}
+                    accessibilityLabel="Ajouter au panier"
+                    accessibilityHint={`Ajouter ${product.title} au panier`}
+                    accessibilityRole="button"
                   >
                     <Ionicons name="add" size={18} color="#fff" />
                   </TouchableOpacity>
                 )}
               </View>
             </View>
-          </Animated.View>
+          </View>
         </Pressable>
-      </Animated.View>
+      </View>
     );
   }
 
-  // Full card view
+  // Vue carte complète
   return (
-    <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+    <View style={styles.cardWrapper}>
       <Pressable 
         style={styles.card} 
         onPress={() => onPress && onPress(product)}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
       >
-        <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <View>
           {/* Product Image */}
           <View style={styles.imageContainer}>
             <Image
               source={{ uri: product.image || 'https://via.placeholder.com/150' }}
               style={styles.image}
               resizeMode="cover"
+              onLoadStart={() => setImageLoading(true)}
+              onLoadEnd={() => setImageLoading(false)}
             />
+            {imageLoading && (
+              <View style={styles.imageLoadingContainer}>
+                <ActivityIndicator size="large" color={categoryColor} />
+              </View>
+            )}
             {/* Gradient overlay */}
             <View style={styles.imageOverlay} />
             
@@ -158,16 +139,16 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
             {/* Favorite Button */}
             {onFavorite && (
               <TouchableOpacity
-                style={[styles.favoriteButton, isFavorite && styles.favoriteButtonActive]}
+                style={[styles.favoriteButton, isFav && styles.favoriteButtonActive]}
                 onPress={(e) => {
                   e.stopPropagation();
                   onFavorite(product);
                 }}
               >
                 <Ionicons
-                  name={isFavorite ? 'heart' : 'heart-outline'}
+                  name={isFav ? 'heart' : 'heart-outline'}
                   size={24}
-                  color={isFavorite ? '#E91E63' : '#fff'}
+                  color={isFav ? '#E91E63' : '#fff'}
                 />
               </TouchableOpacity>
             )}
@@ -225,24 +206,26 @@ export default function ProductCard({ product, onPress, onAddToCart, onFavorite,
               )}
             </View>
           </View>
-        </Animated.View>
+        </View>
       </Pressable>
-    </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // Full card styles
+  // Styles carte complète
   card: {
     backgroundColor: '#fff',
-    borderRadius: 20,
+    borderRadius: 24,
     marginBottom: 20,
-    shadowColor: '#E91E63',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 5,
+    shadowColor: '#1A1F36',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 20,
+    elevation: 8,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.04)',
   },
   imageContainer: {
     position: 'relative',
@@ -318,10 +301,10 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#2D3436',
+    fontWeight: '800',
+    color: '#1A1F36',
     marginBottom: 6,
-    letterSpacing: 0.3,
+    letterSpacing: -0.3,
   },
   description: {
     fontSize: 13,
@@ -382,18 +365,20 @@ const styles = StyleSheet.create({
     marginLeft: 6,
   },
   
-  // Compact card styles
+  // Styles carte compacte
   compactCard: {
     width: CARD_WIDTH,
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 20,
     marginBottom: 16,
-    shadowColor: '#E91E63',
-    shadowOffset: { width: 0, height: 2 },
+    shadowColor: '#1A1F36',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowRadius: 16,
+    elevation: 6,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.04)',
   },
   compactImageContainer: {
     position: 'relative',
@@ -417,10 +402,11 @@ const styles = StyleSheet.create({
   },
   compactTitle: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#2D3436',
+    fontWeight: '700',
+    color: '#1A1F36',
     marginBottom: 8,
     lineHeight: 18,
+    letterSpacing: -0.2,
   },
   compactBottomRow: {
     flexDirection: 'row',
@@ -432,16 +418,16 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   compactAddButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#E91E63',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowColor: '#1A1F36',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   compactGradient: {
     position: 'absolute',
@@ -468,4 +454,24 @@ const styles = StyleSheet.create({
   compactBadgeText: {
     fontSize: 14,
   },
+  imageLoadingContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 16,
+  },
+});
+
+export default memo(ProductCard, (prevProps, nextProps) => {
+  return (
+    prevProps.product.id === nextProps.product.id &&
+    prevProps.isFavorite === nextProps.isFavorite &&
+    prevProps.isAddingToCart === nextProps.isAddingToCart &&
+    prevProps.compact === nextProps.compact
+  );
 });

@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthContext } from '../contexts/AuthContext';
@@ -21,37 +22,50 @@ const MENU_ITEMS = [
   { id: 'about', icon: 'information-circle-outline', label: 'À propos', color: '#607D8B' },
 ];
 
-export default function ProfileScreen({ navigation }) {
-  const { user, logout } = useContext(AuthContext);
-
-  const handleLogout = () => {
-    console.log('=== LOGOUT BUTTON PRESSED ===');
+// Fonction de confirmation multiplateforme
+const confirmLogout = (onConfirm) => {
+  if (Platform.OS === 'web') {
+    // Utiliser la confirmation navigateur pour le web
+    if (window.confirm('Êtes-vous sûr de vouloir vous déconnecter?')) {
+      onConfirm();
+    }
+  } else {
+    // Utiliser Alert.alert pour mobile
     Alert.alert(
       'Déconnexion',
       'Êtes-vous sûr de vouloir vous déconnecter?',
       [
         { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Déconnexion',
-          style: 'destructive',
-          onPress: () => {
-            console.log('Confirming logout...');
-            if (logout) {
-              logout()
-                .then(() => {
-                  console.log('Logged out successfully');
-                })
-                .catch((error) => {
-                  console.error('Erreur lors de la déconnexion:', error);
-                  Alert.alert('Erreur', 'Impossible de se déconnecter. Réessayez.');
-                });
-            } else {
-              console.error('logout function is undefined!');
-            }
-          },
-        },
+        { text: 'Déconnexion', style: 'destructive', onPress: onConfirm },
       ]
     );
+  }
+};
+
+export default function ProfileScreen({ navigation }) {
+  const { user, logout } = useContext(AuthContext);
+
+  const handleLogout = () => {
+    console.log('=== LOGOUT BUTTON PRESSED ===');
+    confirmLogout(() => {
+      console.log('Confirming logout...');
+      if (logout) {
+        logout()
+          .then(() => {
+            console.log('Logged out successfully');
+          })
+          .catch((error) => {
+            console.error('Erreur lors de la déconnexion:', error);
+            if (Platform.OS === 'web') {
+              window.alert('Impossible de se déconnecter. Réessayez.');
+            } else {
+              Alert.alert('Erreur', 'Impossible de se déconnecter. Réessayez.');
+            }
+          });
+      } else {
+        console.error('logout function is undefined!');
+      }
+    });
   };
 
   const handleMenuPress = (itemId) => {
@@ -129,16 +143,7 @@ export default function ProfileScreen({ navigation }) {
         {/* Logout Button */}
         <TouchableOpacity 
           style={styles.logoutButton} 
-          onPress={() => {
-            console.log('=== LOGOUT BUTTON PRESSED ===');
-            const confirmed = window.confirm('Êtes-vous sûr de vouloir vous déconnecter?');
-            if (confirmed) {
-              console.log('Confirming logout...');
-              logout()
-                .then(() => console.log('Logged out'))
-                .catch((e) => console.error('Logout error:', e));
-            }
-          }}
+          onPress={handleLogout}
           activeOpacity={0.7}
         >
           <Ionicons name="log-out-outline" size={22} color="#E91E63" />

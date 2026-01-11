@@ -6,7 +6,7 @@ import { CartProvider } from './src/contexts/CartContext';
 import Navigation from './src/navigation';
 import { LogBox } from 'react-native';
 
-// Suppress specific warnings for react-native-web
+// Supprimer les avertissements spécifiques pour react-native-web
 LogBox.ignoreLogs([
   'props.pointerEvents is deprecated',
   '"textShadow*" style props are deprecated',
@@ -15,7 +15,7 @@ LogBox.ignoreLogs([
   'Cannot record touch end without a touch start',
 ]);
 
-// Suppress console warnings for known react-native-web issues
+// Supprimer les avertissements de console pour les problèmes connus de react-native-web
 const originalWarn = console.warn;
 console.warn = (...args) => {
   const message = args[0];

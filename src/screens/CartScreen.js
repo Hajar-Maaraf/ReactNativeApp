@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useEffect } from 'react';
+import React, { useContext } from 'react';
 import {
   View,
   Text,
@@ -7,7 +7,6 @@ import {
   Image,
   TouchableOpacity,
   Alert,
-  Animated,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { CartContext } from '../contexts/CartContext';
@@ -19,59 +18,23 @@ export default function CartScreen({ navigation }) {
   const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
   const freeDeliveryThreshold = 200;
   const remainingForFreeDelivery = Math.max(0, freeDeliveryThreshold - totalAmount);
-
-  // Animation values
-  const headerAnim = useRef(new Animated.Value(0)).current;
-  const listAnim = useRef(new Animated.Value(0)).current;
-  const summaryAnim = useRef(new Animated.Value(0)).current;
-  const buttonScale = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.stagger(100, [
-      Animated.timing(headerAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: false,
-      }),
-      Animated.timing(listAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: false,
-      }),
-      Animated.timing(summaryAnim, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: false,
-      }),
-    ]).start();
-  }, []);
-
-  const handlePressIn = () => {
-    Animated.spring(buttonScale, {
-      toValue: 0.95,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.spring(buttonScale, {
-      toValue: 1,
-      friction: 3,
-      useNativeDriver: false,
-    }).start();
-  };
+  const deliveryFee = remainingForFreeDelivery > 0 ? 20 : 0;
 
   const handleCheckout = () => {
     Alert.alert(
-      'Confirmer la commande',
-      `Total: ${totalAmount.toFixed(2)} DH\n${totalItems} article(s)`,
+      '✨ Confirmer la commande',
+      `📦 ${totalItems} article(s)\n💰 Total: ${(totalAmount + deliveryFee).toFixed(2)} DH${deliveryFee === 0 ? '\n🎉 Livraison gratuite!' : ''}`,
       [
         { text: 'Annuler', style: 'cancel' },
         {
           text: 'Commander',
           onPress: () => {
             clearCart();
-            Alert.alert('Merci! 🎉', 'Votre commande a été passée avec succès!');
+            Alert.alert(
+              '🎉 Commande confirmée!',
+              'Votre commande a été passée avec succès!\nVous recevrez une confirmation par email.',
+              [{ text: 'Super!' }]
+            );
           },
         },
       ]
@@ -85,19 +48,8 @@ export default function CartScreen({ navigation }) {
     ]);
   };
 
-  const renderCartItem = ({ item, index }) => (
-    <Animated.View
-      style={[
-        styles.cartItem,
-        {
-          opacity: listAnim,
-          transform: [{ translateX: listAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [50, 0]
-          })}]
-        }
-      ]}
-    >
+  const renderCartItem = ({ item }) => (
+    <View style={styles.cartItem}>
       <View style={styles.imageContainer}>
         <Image
           source={{ uri: item.image || 'https://via.placeholder.com/80' }}
@@ -143,26 +95,15 @@ export default function CartScreen({ navigation }) {
           <Ionicons name="trash-outline" size={16} color="#FF5252" />
         </TouchableOpacity>
       </View>
-    </Animated.View>
+    </View>
   );
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <Animated.View 
-        style={[
-          styles.header,
-          {
-            opacity: headerAnim,
-            transform: [{ translateY: headerAnim.interpolate({
-              inputRange: [0, 1],
-              outputRange: [-20, 0]
-            })}]
-          }
-        ]}
-      >
+      <View style={styles.header}>
         <View>
-          <Text style={styles.title}>Mon Panier</Text>
+          <Text style={styles.title}>🛒 Mon Panier</Text>
           {cart.length > 0 && (
             <Text style={styles.itemCount}>{totalItems} article{totalItems > 1 ? 's' : ''}</Text>
           )}
@@ -172,7 +113,7 @@ export default function CartScreen({ navigation }) {
             <Ionicons name="trash-outline" size={20} color="#E91E63" />
           </TouchableOpacity>
         )}
-      </Animated.View>
+      </View>
 
       {cart.length === 0 ? (
         <View style={styles.emptyContainer}>
@@ -224,26 +165,15 @@ export default function CartScreen({ navigation }) {
           />
 
           {/* Summary */}
-          <Animated.View 
-            style={[
-              styles.summaryContainer,
-              {
-                opacity: summaryAnim,
-                transform: [{ translateY: summaryAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: [50, 0]
-                })}]
-              }
-            ]}
-          >
+          <View style={styles.summaryContainer}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Articles ({totalItems})</Text>
+              <Text style={styles.summaryLabel}>📦 Articles ({totalItems})</Text>
               <Text style={styles.summaryValue}>{totalAmount.toFixed(2)} DH</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Livraison</Text>
+              <Text style={styles.summaryLabel}>🚚 Livraison</Text>
               <Text style={[styles.summaryValue, remainingForFreeDelivery <= 0 && styles.freeText]}>
-                {remainingForFreeDelivery <= 0 ? 'Gratuite' : '20 DH'}
+                {remainingForFreeDelivery <= 0 ? '✨ Gratuite' : '20 DH'}
               </Text>
             </View>
             <View style={styles.divider} />
@@ -254,22 +184,18 @@ export default function CartScreen({ navigation }) {
               </Text>
             </View>
 
-            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
-              <TouchableOpacity 
-                style={styles.checkoutButton} 
-                onPress={handleCheckout}
-                onPressIn={handlePressIn}
-                onPressOut={handlePressOut}
-                activeOpacity={0.9}
-              >
-                <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
-                <Text style={styles.checkoutText}>Passer la commande</Text>
-                <View style={styles.checkoutArrow}>
-                  <Ionicons name="arrow-forward" size={18} color="#E91E63" />
-                </View>
-              </TouchableOpacity>
-            </Animated.View>
-          </Animated.View>
+            <TouchableOpacity 
+              style={styles.checkoutButton} 
+              onPress={handleCheckout}
+              activeOpacity={0.8}
+            >
+              <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
+              <Text style={styles.checkoutText}>Passer la commande</Text>
+              <View style={styles.checkoutArrow}>
+                <Ionicons name="arrow-forward" size={18} color="#E91E63" />
+              </View>
+            </TouchableOpacity>
+          </View>
         </>
       )}
     </View>

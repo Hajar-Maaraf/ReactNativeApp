@@ -19,7 +19,7 @@ import NotificationsScreen from '../screens/NotificationsScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-// Stack navigator for screens that need navigation within tabs
+// Navigateur Stack pour les écrans nécessitant une navigation dans les onglets
 function CatalogStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>

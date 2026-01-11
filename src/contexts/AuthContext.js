@@ -20,7 +20,7 @@ import { auth } from '../services/firebase';
 
 export const AuthContext = createContext();
 
-// Demo mode - set to true to bypass Firebase auth for testing
+// Mode démo - définir à true pour contourner l'authentification Firebase pour les tests
 // Mettez DEMO_MODE = true si Firebase n'est pas configuré
 const DEMO_MODE = false;
 const DEMO_USER = { email: 'demo@sweetbloom.com', uid: 'demo-user-123' };

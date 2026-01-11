@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Mock orders for demo
+// Commandes mock pour la démo
 const MOCK_ORDERS = [
   {
     id: '1',
