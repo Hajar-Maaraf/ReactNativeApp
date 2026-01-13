@@ -12,7 +12,7 @@ function cartReducer(state, action) {
         );
       }
       return [...state, { ...action.product, qty: 1 }];
-    }
+    } 
     case 'DECREMENT': {
       const existing = state.find((p) => p.id === action.id);
       if (existing && existing.qty > 1) {
